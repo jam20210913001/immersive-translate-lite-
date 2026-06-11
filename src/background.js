@@ -1,4 +1,4 @@
-import { DEFAULT_SETTINGS, domainMatches } from "./defaults.js";
+import { DEFAULT_SETTINGS, FREE_TRANSLATION_PROVIDERS, domainMatches } from "./defaults.js";
 
 const MENU_ID = "toggle-translation";
 
@@ -68,10 +68,15 @@ async function sendToActiveTab(message) {
 
 async function translateBatch(texts) {
   const settings = await chrome.storage.sync.get(DEFAULT_SETTINGS);
+  if (!Array.isArray(texts) || texts.length === 0) return [];
+
+  if (FREE_TRANSLATION_PROVIDERS.has(settings.provider)) {
+    return translateWithFreeService(texts, settings);
+  }
+
   if (!settings.endpoint) {
     throw new Error("Please configure an API endpoint in extension options.");
   }
-  if (!Array.isArray(texts) || texts.length === 0) return [];
 
   const prompt = buildPrompt(texts, settings.targetLanguage);
   const requestBody = settings.provider === "custom"
@@ -115,7 +120,7 @@ async function translateBatch(texts) {
 
 function buildPrompt(texts, targetLanguage) {
   return [
-    `Translate the following JSON array into ${targetLanguage || "简体中文"}.`,
+    `Translate the following JSON array into ${targetLanguage || "\u7b80\u4f53\u4e2d\u6587"}.`,
     "Return only a JSON string array. Do not add markdown, explanations, numbering, or extra keys.",
     JSON.stringify(texts)
   ].join("\n\n");
@@ -144,6 +149,157 @@ function buildChatCompletionBody(settings, prompt) {
   }
 
   return body;
+}
+
+async function translateWithFreeService(texts, settings) {
+  const translations = [];
+  for (const text of texts) {
+    if (settings.provider === "google_free") {
+      translations.push(await translateGoogleFree(text, settings));
+    } else if (settings.provider === "microsoft_free") {
+      translations.push(await translateMicrosoftFree(text, settings));
+    } else if (settings.provider === "mymemory_free") {
+      translations.push(await translateMyMemoryFree(text, settings));
+    } else if (settings.provider === "libretranslate_free") {
+      translations.push(await translateLibreTranslate(text, settings));
+    }
+  }
+  return translations;
+}
+
+async function translateGoogleFree(text, settings) {
+  const target = normalizeGoogleLanguage(settings.targetLanguageCode);
+  const source = normalizeGoogleLanguage(settings.sourceLanguageCode || "auto");
+  const url = new URL(settings.endpoint || "https://translate.googleapis.com/translate_a/single");
+  url.searchParams.set("client", "gtx");
+  url.searchParams.set("sl", source);
+  url.searchParams.set("tl", target);
+  url.searchParams.set("dt", "t");
+  url.searchParams.set("q", text);
+
+  const data = await fetchJson(url.toString());
+  return String((data?.[0] || []).map((part) => part?.[0] || "").join(""));
+}
+
+async function translateMicrosoftFree(text, settings) {
+  const target = normalizeMicrosoftLanguage(settings.targetLanguageCode);
+  const source = normalizeMicrosoftLanguage(settings.sourceLanguageCode || "");
+  const credentials = await getBingTranslatorCredentials(settings.endpoint);
+  const url = new URL("https://www.bing.com/ttranslatev3");
+  url.searchParams.set("isVertical", "1");
+  if (credentials.ig) url.searchParams.set("IG", credentials.ig);
+  if (credentials.iid) url.searchParams.set("IID", credentials.iid);
+
+  const body = new URLSearchParams();
+  body.set("fromLang", source && source !== "auto" ? source : "auto-detect");
+  body.set("to", target);
+  body.set("text", text);
+  body.set("token", credentials.token);
+  body.set("key", credentials.key);
+  body.set("tryFetchingGenderDebiasedTranslations", "true");
+
+  const data = await fetchJson(url.toString(), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: body.toString()
+  });
+  return String(data?.[0]?.translations?.[0]?.text || data?.[0]?.translations?.[0]?.displayTarget || "");
+}
+
+async function translateMyMemoryFree(text, settings) {
+  const target = normalizeGenericLanguage(settings.targetLanguageCode);
+  const source = normalizeGenericLanguage(settings.sourceLanguageCode) === "auto"
+    ? "en"
+    : normalizeGenericLanguage(settings.sourceLanguageCode);
+  const url = new URL(settings.endpoint || "https://api.mymemory.translated.net/get");
+  url.searchParams.set("q", text);
+  url.searchParams.set("langpair", `${source}|${target}`);
+
+  const data = await fetchJson(url.toString());
+  return String(data?.responseData?.translatedText || "");
+}
+
+async function translateLibreTranslate(text, settings) {
+  const target = normalizeLibreLanguage(settings.targetLanguageCode);
+  const source = normalizeLibreLanguage(settings.sourceLanguageCode || "auto");
+  const data = await fetchJson(settings.endpoint || "https://libretranslate.com/translate", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      q: text,
+      source,
+      target,
+      format: "text"
+    })
+  });
+  return String(data?.translatedText || "");
+}
+
+async function fetchJson(url, init) {
+  const response = await fetch(url, init);
+  if (!response.ok) {
+    const detail = await response.text().catch(() => "");
+    throw new Error(`Translation service failed: ${response.status} ${detail.slice(0, 240)}`);
+  }
+  return response.json();
+}
+
+async function getBingTranslatorCredentials(endpoint) {
+  const home = endpoint || "https://www.bing.com/translator";
+  const response = await fetch(home);
+  if (!response.ok) {
+    throw new Error(`Could not load Bing Translator: ${response.status}`);
+  }
+
+  const html = await response.text();
+  const paramsMatch = html.match(/params_RichTranslateHelper\s*=\s*(\[[^\]]+\])/);
+  if (!paramsMatch) {
+    throw new Error("Could not find Bing Translator token.");
+  }
+
+  let params;
+  try {
+    params = JSON.parse(paramsMatch[1]);
+  } catch {
+    throw new Error("Could not parse Bing Translator token.");
+  }
+
+  const ig = html.match(/IG:"([^"]+)"/)?.[1] || html.match(/"IG":"([^"]+)"/)?.[1] || "";
+  const iid = html.match(/data-iid="([^"]+)"/)?.[1] || "translator.5028";
+  return {
+    key: String(params[0] || ""),
+    token: String(params[1] || ""),
+    ig,
+    iid
+  };
+}
+
+function normalizeGenericLanguage(value) {
+  return String(value || "auto").trim() || "auto";
+}
+
+function normalizeGoogleLanguage(value) {
+  const language = normalizeGenericLanguage(value);
+  if (language.toLowerCase() === "zh-cn") return "zh-CN";
+  if (language.toLowerCase() === "zh-tw") return "zh-TW";
+  return language;
+}
+
+function normalizeMicrosoftLanguage(value) {
+  const language = normalizeGenericLanguage(value);
+  if (language.toLowerCase() === "zh-cn") return "zh-Hans";
+  if (language.toLowerCase() === "zh-tw") return "zh-Hant";
+  return language;
+}
+
+function normalizeLibreLanguage(value) {
+  const language = normalizeGenericLanguage(value);
+  if (language.toLowerCase() === "zh-cn") return "zh";
+  return language.split("-")[0];
 }
 
 function renderTemplate(template, values) {

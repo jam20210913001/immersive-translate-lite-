@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,39 +10,62 @@
     <main>
       <header>
         <h1>Immersive Translate Lite</h1>
-        <p>配置你的翻译模型、自动翻译网站和批量翻译行为。</p>
+        <p>Configure model providers, free translation services, auto-translate sites, and batching.</p>
       </header>
 
       <section>
-        <h2>模型接口</h2>
+        <h2>Translation Provider</h2>
         <label>
           Provider
           <select id="provider">
-            <option value="openai">OpenAI Compatible</option>
-            <option value="deepseek">DeepSeek V4 Pro</option>
-            <option value="custom">Custom Template</option>
+            <optgroup label="LLM providers">
+              <option value="openai">OpenAI Compatible</option>
+              <option value="deepseek">DeepSeek V4 Pro</option>
+              <option value="doubao">Doubao / Volcano Ark</option>
+              <option value="kimi">Kimi / Moonshot</option>
+              <option value="qwen">Qwen / DashScope</option>
+              <option value="gemini">Gemini OpenAI-compatible</option>
+            </optgroup>
+            <optgroup label="Free translation services">
+              <option value="google_free">Google Translate Free</option>
+              <option value="microsoft_free">Microsoft Translator Free</option>
+              <option value="mymemory_free">MyMemory Free</option>
+              <option value="libretranslate_free">LibreTranslate-compatible</option>
+            </optgroup>
+            <optgroup label="Advanced">
+              <option value="custom">Custom Template</option>
+            </optgroup>
           </select>
         </label>
         <label>
           Endpoint
           <input id="endpoint" placeholder="https://api.example.com/v1/chat/completions">
         </label>
-        <label>
+        <label id="apiKeyLabel">
           API Key
           <input id="apiKey" type="password" placeholder="sk-...">
         </label>
-        <label>
+        <label id="modelLabel">
           Model
           <input id="model" placeholder="gpt-4.1-mini">
         </label>
         <label>
-          Target Language
-          <input id="targetLanguage" placeholder="简体中文">
+          Target Language Name
+          <input id="targetLanguage" placeholder="Simplified Chinese">
+        </label>
+        <label>
+          Target Language Code
+          <input id="targetLanguageCode" placeholder="zh-CN">
+        </label>
+        <label>
+          Source Language Code
+          <input id="sourceLanguageCode" placeholder="auto">
         </label>
         <label>
           Batch Size
           <input id="batchSize" type="number" min="1" max="50">
         </label>
+        <p id="providerNote" class="hint"></p>
         <div id="deepseekSection">
           <label>
             Thinking Mode
@@ -62,18 +85,18 @@
       </section>
 
       <section id="templateSection">
-        <h2>自定义请求模板</h2>
+        <h2>Custom Request Template</h2>
         <textarea id="requestTemplate" spellcheck="false"></textarea>
       </section>
 
       <section>
-        <h2>自动翻译网站</h2>
-        <p class="hint">每行一个域名，例如：docs.example.com 或 example.com。</p>
+        <h2>Auto-translate Sites</h2>
+        <p class="hint">One domain per line, such as docs.example.com or example.com.</p>
         <textarea id="autoTranslateDomains" spellcheck="false"></textarea>
       </section>
 
       <footer>
-        <button id="save">保存设置</button>
+        <button id="save">Save Settings</button>
         <span id="status" role="status"></span>
       </footer>
     </main>
