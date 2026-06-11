@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Immersive Translate Lite Options</title>
+    <link rel="stylesheet" href="options.css">
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Immersive Translate Lite</h1>
+        <p>配置你的翻译模型、自动翻译网站和批量翻译行为。</p>
+      </header>
+
+      <section>
+        <h2>模型接口</h2>
+        <label>
+          Provider
+          <select id="provider">
+            <option value="openai">OpenAI Compatible</option>
+            <option value="custom">Custom Template</option>
+          </select>
+        </label>
+        <label>
+          Endpoint
+          <input id="endpoint" placeholder="https://api.example.com/v1/chat/completions">
+        </label>
+        <label>
+          API Key
+          <input id="apiKey" type="password" placeholder="sk-...">
+        </label>
+        <label>
+          Model
+          <input id="model" placeholder="gpt-4.1-mini">
+        </label>
+        <label>
+          Target Language
+          <input id="targetLanguage" placeholder="简体中文">
+        </label>
+        <label>
+          Batch Size
+          <input id="batchSize" type="number" min="1" max="50">
+        </label>
+      </section>
+
+      <section id="templateSection">
+        <h2>自定义请求模板</h2>
+        <textarea id="requestTemplate" spellcheck="false"></textarea>
+      </section>
+
+      <section>
+        <h2>自动翻译网站</h2>
+        <p class="hint">每行一个域名，例如：docs.example.com 或 example.com。</p>
+        <textarea id="autoTranslateDomains" spellcheck="false"></textarea>
+      </section>
+
+      <footer>
+        <button id="save">保存设置</button>
+        <span id="status" role="status"></span>
+      </footer>
+    </main>
+    <script type="module" src="options.js"></script>
+  </body>
+</html>

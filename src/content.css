@@ -1,0 +1,25 @@
+.itl-translation {
+  display: block;
+  margin: 0.35em 0 0;
+  padding-left: 0.75em;
+  border-left: 3px solid #14b8a6;
+  color: #0f766e;
+  font-size: 0.96em;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
+.itl-loading {
+  color: #64748b;
+  border-left-color: #94a3b8;
+}
+
+.itl-error {
+  color: #b91c1c;
+  border-left-color: #ef4444;
+}
+
+.itl-translating {
+  outline: 1px dashed rgba(20, 184, 166, 0.35);
+  outline-offset: 2px;
+}
