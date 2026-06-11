@@ -1,4 +1,4 @@
-import { DEFAULT_SETTINGS, normalizeDomain } from "./defaults.js";
+import { DEFAULT_SETTINGS, PROVIDER_PRESETS, normalizeDomain } from "./defaults.js";
 
 const fields = [
   "provider",
@@ -7,15 +7,18 @@ const fields = [
   "model",
   "targetLanguage",
   "batchSize",
+  "thinkingMode",
+  "reasoningEffort",
   "requestTemplate"
 ];
 
 const elements = Object.fromEntries(
-  ["autoTranslateDomains", "save", "status", "templateSection", ...fields].map((id) => [id, document.getElementById(id)])
+  ["autoTranslateDomains", "save", "status", "templateSection", "deepseekSection", ...fields].map((id) => [id, document.getElementById(id)])
 );
 
 loadSettings();
 elements.provider.addEventListener("change", syncTemplateVisibility);
+elements.provider.addEventListener("change", applyProviderPreset);
 elements.save.addEventListener("click", saveSettings);
 
 async function loadSettings() {
@@ -40,6 +43,8 @@ async function saveSettings() {
     model: elements.model.value.trim(),
     targetLanguage: elements.targetLanguage.value.trim() || DEFAULT_SETTINGS.targetLanguage,
     batchSize: Number(elements.batchSize.value || DEFAULT_SETTINGS.batchSize),
+    thinkingMode: elements.thinkingMode.value,
+    reasoningEffort: elements.reasoningEffort.value,
     requestTemplate: elements.requestTemplate.value,
     autoTranslateDomains: Array.from(new Set(autoTranslateDomains))
   };
@@ -52,5 +57,16 @@ async function saveSettings() {
 }
 
 function syncTemplateVisibility() {
-  elements.templateSection.hidden = elements.provider.value !== "custom";
+  const provider = elements.provider.value;
+  elements.templateSection.hidden = provider !== "custom";
+  elements.deepseekSection.hidden = provider !== "deepseek";
+}
+
+function applyProviderPreset() {
+  const preset = PROVIDER_PRESETS[elements.provider.value];
+  if (preset) {
+    elements.endpoint.value = preset.endpoint;
+    elements.model.value = preset.model;
+  }
+  syncTemplateVisibility();
 }

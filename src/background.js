@@ -81,20 +81,7 @@ async function translateBatch(texts) {
         textsJson: JSON.stringify(texts),
         prompt
       })
-    : JSON.stringify({
-        model: settings.model,
-        messages: [
-          {
-            role: "system",
-            content: "You are a precise translation engine. Return only a JSON string array. Keep array length and order unchanged."
-          },
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
-        temperature: 0.2
-      });
+    : JSON.stringify(buildChatCompletionBody(settings, prompt));
 
   let body;
   try {
@@ -132,6 +119,31 @@ function buildPrompt(texts, targetLanguage) {
     "Return only a JSON string array. Do not add markdown, explanations, numbering, or extra keys.",
     JSON.stringify(texts)
   ].join("\n\n");
+}
+
+function buildChatCompletionBody(settings, prompt) {
+  const body = {
+    model: settings.model,
+    messages: [
+      {
+        role: "system",
+        content: "You are a precise translation engine. Return only a JSON string array. Keep array length and order unchanged."
+      },
+      {
+        role: "user",
+        content: prompt
+      }
+    ],
+    temperature: 0.2,
+    stream: false
+  };
+
+  if (settings.provider === "deepseek" && settings.model === "deepseek-v4-pro") {
+    body.thinking = { type: settings.thinkingMode || "enabled" };
+    body.reasoning_effort = settings.reasoningEffort || "high";
+  }
+
+  return body;
 }
 
 function renderTemplate(template, values) {

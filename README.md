@@ -3,6 +3,7 @@
 一个可本地加载的 Chrome Manifest V3 双语翻译扩展原型，支持：
 
 - 使用 OpenAI-compatible API 或自定义请求模板
+- 内置 DeepSeek V4 Pro 预设
 - 配置 API endpoint、model、API key、目标语言
 - 设置自动翻译的网站域名
 - 使用快捷键切换当前页面翻译
@@ -46,6 +47,24 @@
 ```
 
 扩展会要求模型只返回 JSON 字符串数组。
+
+## DeepSeek V4 Pro 示例
+
+Provider 选择 `DeepSeek V4 Pro` 后会自动填入：
+
+- Endpoint: `https://api.deepseek.com/chat/completions`
+- Model: `deepseek-v4-pro`
+
+DeepSeek API 使用 OpenAI-compatible 格式。`deepseek-v4-pro` 默认会附带：
+
+```json
+{
+  "thinking": { "type": "enabled" },
+  "reasoning_effort": "high"
+}
+```
+
+如果你想减少思考开销，可以在设置页把 Thinking Mode 设为 `Disabled`。需要更强推理时，可以把 Reasoning Effort 从 `High` 调到 `Max`。
 
 ## 自定义请求模板
 

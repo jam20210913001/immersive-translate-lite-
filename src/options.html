@@ -19,6 +19,7 @@
           Provider
           <select id="provider">
             <option value="openai">OpenAI Compatible</option>
+            <option value="deepseek">DeepSeek V4 Pro</option>
             <option value="custom">Custom Template</option>
           </select>
         </label>
@@ -42,6 +43,22 @@
           Batch Size
           <input id="batchSize" type="number" min="1" max="50">
         </label>
+        <div id="deepseekSection">
+          <label>
+            Thinking Mode
+            <select id="thinkingMode">
+              <option value="enabled">Enabled</option>
+              <option value="disabled">Disabled</option>
+            </select>
+          </label>
+          <label>
+            Reasoning Effort
+            <select id="reasoningEffort">
+              <option value="high">High</option>
+              <option value="max">Max</option>
+            </select>
+          </label>
+        </div>
       </section>
 
       <section id="templateSection">
