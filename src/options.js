@@ -31,6 +31,7 @@ const elements = Object.fromEntries(
     "neverTranslateDomains",
     "save",
     "shortcuts",
+    "controlPanel",
     "status",
     "templateSection",
     "deepseekSection",
@@ -63,6 +64,9 @@ elements.clearCache.addEventListener("click", () => setStatus("\u7f13\u5b58\u5df
 elements.resetSettings.addEventListener("click", resetSettings);
 elements.shortcuts.addEventListener("click", async () => {
   await chrome.tabs.create({ url: "chrome://extensions/shortcuts" });
+});
+elements.controlPanel.addEventListener("click", async () => {
+  await chrome.tabs.create({ url: chrome.runtime.getURL("src/popup.html") });
 });
 
 async function loadSettings() {

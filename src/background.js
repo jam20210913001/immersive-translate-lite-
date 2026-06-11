@@ -1,6 +1,7 @@
 import { DEFAULT_SETTINGS, FREE_TRANSLATION_PROVIDERS, domainMatches } from "./defaults.js";
 
 const MENU_ID = "toggle-translation";
+const PANEL_MENU_ID = "open-control-panel";
 
 chrome.runtime.onInstalled.addListener(async () => {
   const existing = await chrome.storage.sync.get(DEFAULT_SETTINGS);
@@ -9,6 +10,11 @@ chrome.runtime.onInstalled.addListener(async () => {
     id: MENU_ID,
     title: "Toggle bilingual translation",
     contexts: ["page"]
+  });
+  chrome.contextMenus.create({
+    id: PANEL_MENU_ID,
+    title: "Open translation control panel",
+    contexts: ["action", "page"]
   });
 });
 
@@ -21,6 +27,8 @@ chrome.commands.onCommand.addListener(async (command) => {
 chrome.contextMenus.onClicked.addListener(async (info) => {
   if (info.menuItemId === MENU_ID) {
     await sendToActiveTab({ type: "TOGGLE_TRANSLATION" });
+  } else if (info.menuItemId === PANEL_MENU_ID) {
+    await chrome.tabs.create({ url: chrome.runtime.getURL("src/popup.html") });
   }
 });
 

@@ -12,7 +12,7 @@ It keeps the original page text and inserts translated text below each paragraph
 - Custom request template mode for your own model gateway
 - Per-site auto-translate domain list
 - Never-translate domain list
-- Keyboard shortcut toggle, default `Alt+D`
+- Keyboard shortcut toggle, default `Alt+A`
 - Popup control panel inspired by immersive translation tools
 - Text translation in the popup
 - Selection translation button
@@ -29,13 +29,13 @@ It keeps the original page text and inserts translated text below each paragraph
 
 ## Keyboard Shortcut
 
-The default command is `Alt+D`. Chrome commonly uses `Alt+D` for focusing the address bar, so confirm the shortcut after loading the extension:
+The default page-translate command is `Alt+A`. The extension action is configured to translate the current page directly instead of opening the popup:
 
 1. Open `chrome://extensions/shortcuts`.
 2. Find `Immersive Translate Lite`.
 3. Change `Toggle bilingual translation on the current page`.
 
-The popup and options page both include a Keyboard Shortcuts button that opens Chrome's shortcuts page.
+The options page includes buttons for opening Chrome's shortcuts page and the translation control panel.
 
 ## Interaction Modes
 
