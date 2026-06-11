@@ -23,6 +23,7 @@ const elements = Object.fromEntries(
   [
     "autoTranslateDomains",
     "save",
+    "shortcuts",
     "status",
     "templateSection",
     "deepseekSection",
@@ -50,6 +51,9 @@ const providerNotes = {
 loadSettings();
 elements.provider.addEventListener("change", applyProviderPreset);
 elements.save.addEventListener("click", saveSettings);
+elements.shortcuts.addEventListener("click", async () => {
+  await chrome.tabs.create({ url: "chrome://extensions/shortcuts" });
+});
 
 async function loadSettings() {
   const settings = await chrome.storage.sync.get(DEFAULT_SETTINGS);

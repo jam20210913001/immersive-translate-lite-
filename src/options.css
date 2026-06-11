@@ -99,6 +99,15 @@ button:hover {
   background: #115e59;
 }
 
+button.secondary {
+  color: #0f172a;
+  background: #e2e8f0;
+}
+
+button.secondary:hover {
+  background: #cbd5e1;
+}
+
 #status {
   color: #0f766e;
   font-size: 13px;

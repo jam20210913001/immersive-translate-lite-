@@ -1,12 +1,12 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Immersive Translate Lite</title>
     <style>
       body {
-        width: 260px;
+        width: 280px;
         margin: 0;
         padding: 14px;
         font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -15,6 +15,12 @@
       h1 {
         margin: 0 0 12px;
         font-size: 16px;
+      }
+      p {
+        margin: 0 0 10px;
+        color: #475569;
+        font-size: 12px;
+        line-height: 1.45;
       }
       button {
         width: 100%;
@@ -42,8 +48,10 @@
   </head>
   <body>
     <h1>Immersive Translate Lite</h1>
-    <button id="toggle">翻译 / 还原当前页面</button>
-    <button id="options" class="secondary">打开设置</button>
+    <p>Default shortcut: Alt+D. If Chrome keeps that key for the address bar, set it manually in shortcuts.</p>
+    <button id="toggle">Translate / Restore Page</button>
+    <button id="options" class="secondary">Open Options</button>
+    <button id="shortcuts" class="secondary">Keyboard Shortcuts</button>
     <div id="status"></div>
     <script type="module" src="popup.js"></script>
   </body>

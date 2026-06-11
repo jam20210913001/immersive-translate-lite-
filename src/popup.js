@@ -7,9 +7,13 @@ document.getElementById("toggle").addEventListener("click", async () => {
     ok: false,
     error: error.message
   }));
-  status.textContent = response?.ok === false ? response.error : "已发送翻译指令";
+  status.textContent = response?.ok === false ? response.error : "Translation command sent";
 });
 
 document.getElementById("options").addEventListener("click", () => {
   chrome.runtime.openOptionsPage();
+});
+
+document.getElementById("shortcuts").addEventListener("click", async () => {
+  await chrome.tabs.create({ url: "chrome://extensions/shortcuts" });
 });

@@ -11,7 +11,7 @@ It keeps the original page text and inserts translated text below each paragraph
 - Free translation service presets for Google Translate, Microsoft Translator, MyMemory, and LibreTranslate-compatible endpoints
 - Custom request template mode for your own model gateway
 - Per-site auto-translate domain list
-- Keyboard shortcut toggle, default `Alt+T`
+- Keyboard shortcut toggle, default `Alt+D`
 - Popup and context menu toggle
 
 ## Install Locally
@@ -24,11 +24,13 @@ It keeps the original page text and inserts translated text below each paragraph
 
 ## Keyboard Shortcut
 
-The default command is `Alt+T`. If it conflicts with your browser or operating system:
+The default command is `Alt+D`. Chrome commonly uses `Alt+D` for focusing the address bar, so confirm the shortcut after loading the extension:
 
 1. Open `chrome://extensions/shortcuts`.
 2. Find `Immersive Translate Lite`.
 3. Change `Toggle bilingual translation on the current page`.
+
+The popup and options page both include a Keyboard Shortcuts button that opens Chrome's shortcuts page.
 
 ## Provider Presets
 

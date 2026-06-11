@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Immersive Translate Lite",
   "description": "A lightweight bilingual page translator with custom LLM support.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "permissions": [
     "activeTab",
     "contextMenus",
@@ -38,8 +38,8 @@
   "commands": {
     "toggle-translation": {
       "suggested_key": {
-        "default": "Alt+T",
-        "mac": "Alt+T"
+        "default": "Alt+D",
+        "mac": "Alt+D"
       },
       "description": "Toggle bilingual translation on the current page"
     }
