@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Immersive Translate Lite",
   "description": "A lightweight bilingual page translator with custom LLM support.",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "permissions": [
     "activeTab",
     "contextMenus",

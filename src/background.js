@@ -36,8 +36,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   if (message?.type === "SHOULD_AUTO_TRANSLATE") {
     chrome.storage.sync.get(DEFAULT_SETTINGS).then((settings) => {
+      const neverTranslate = domainMatches(message.hostname, settings.neverTranslateDomains || []);
       sendResponse({
-        shouldTranslate: domainMatches(message.hostname, settings.autoTranslateDomains || [])
+        shouldTranslate: !neverTranslate && domainMatches(message.hostname, settings.autoTranslateDomains || [])
       });
     });
     return true;

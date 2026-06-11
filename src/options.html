@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,23 +7,58 @@
     <link rel="stylesheet" href="options.css">
   </head>
   <body>
-    <main>
-      <header>
-        <h1>Immersive Translate Lite</h1>
-        <p>Configure model providers, free translation services, auto-translate sites, and batching.</p>
-      </header>
+    <header class="page-head">
+      <h1 id="pageTitle">&#x57fa;&#x672c;&#x8bbe;&#x7f6e;</h1>
+      <div class="head-actions">
+        <button id="clearCache" type="button">&#x2398; &#x6e05;&#x9664;&#x7f13;&#x5b58;</button>
+        <button id="resetSettings" type="button">&#x27f3; &#x91cd;&#x7f6e;&#x8bbe;&#x7f6e;</button>
+      </div>
+    </header>
 
-      <section>
-        <h2>Translation Provider</h2>
-        <label>
-          Provider
+    <main class="layout">
+      <nav class="tabs" aria-label="Settings sections">
+        <button class="tab active" type="button" data-panel="basic">&#x57fa;&#x672c;&#x8bbe;&#x7f6e;</button>
+        <button class="tab" type="button" data-panel="selection">&#x5212;&#x8bcd;&#x7ffb;&#x8bd1;</button>
+        <button class="tab" type="button" data-panel="hover">&#x9f20;&#x6807;&#x60ac;&#x505c;</button>
+      </nav>
+
+      <section id="basic" class="panel active">
+        <div class="setting-row">
+          <div>
+            <h2>&#x76ee;&#x6807;&#x8bed;&#x8a00;</h2>
+            <p>&#x5c06;&#x5176;&#x4ed6;&#x8bed;&#x8a00;&#x7ffb;&#x8bd1;&#x6210;&#x60a8;&#x8bbe;&#x7f6e;&#x7684;&#x8bed;&#x8a00;</p>
+          </div>
+          <input id="targetLanguage" placeholder="Simplified Chinese">
+        </div>
+
+        <div class="setting-row">
+          <div>
+            <h2>Target Language Code</h2>
+            <p>Used by free translation services, such as zh-CN, en, ja, ko.</p>
+          </div>
+          <input id="targetLanguageCode" placeholder="zh-CN">
+        </div>
+
+        <div class="setting-row">
+          <div>
+            <h2>Source Language Code</h2>
+            <p>Use auto when supported, or a concrete code such as en.</p>
+          </div>
+          <input id="sourceLanguageCode" placeholder="auto">
+        </div>
+
+        <div class="setting-row">
+          <div>
+            <h2>&#x7ffb;&#x8bd1;&#x670d;&#x52a1;</h2>
+            <p>&#x9009;&#x62e9;&#x4e00;&#x4e2a;&#x7ffb;&#x8bd1;&#x670d;&#x52a1;</p>
+          </div>
           <select id="provider">
             <optgroup label="LLM providers">
               <option value="openai">OpenAI Compatible</option>
               <option value="deepseek">DeepSeek V4 Pro</option>
-              <option value="doubao">Doubao / Volcano Ark</option>
+              <option value="doubao">&#x8c46;&#x5305; / Volcano Ark</option>
               <option value="kimi">Kimi / Moonshot</option>
-              <option value="qwen">Qwen / DashScope</option>
+              <option value="qwen">&#x5343;&#x95ee; / DashScope</option>
               <option value="gemini">Gemini OpenAI-compatible</option>
             </optgroup>
             <optgroup label="Free translation services">
@@ -36,73 +71,134 @@
               <option value="custom">Custom Template</option>
             </optgroup>
           </select>
-        </label>
-        <label>
-          Endpoint
+        </div>
+
+        <div class="setting-row">
+          <div>
+            <h2>&#x754c;&#x9762;&#x8bed;&#x8a00;</h2>
+            <p>&#x754c;&#x9762;&#x8bed;&#x8a00;&#x53ea;&#x5f71;&#x54cd;&#x63a7;&#x5236;&#x9762;&#x677f;&#x663e;&#x793a;</p>
+          </div>
+          <select id="uiLanguage">
+            <option value="zh-CN">&#x7b80;&#x4f53;&#x4e2d;&#x6587;</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+
+        <div class="setting-row">
+          <div>
+            <h2>Endpoint</h2>
+            <p>Provider endpoint or your custom gateway URL.</p>
+          </div>
           <input id="endpoint" placeholder="https://api.example.com/v1/chat/completions">
-        </label>
-        <label id="apiKeyLabel">
-          API Key
+        </div>
+
+        <div id="apiKeyRow" class="setting-row">
+          <div>
+            <h2>API Key</h2>
+            <p>Required for most LLM providers.</p>
+          </div>
           <input id="apiKey" type="password" placeholder="sk-...">
-        </label>
-        <label id="modelLabel">
-          Model
+        </div>
+
+        <div id="modelRow" class="setting-row">
+          <div>
+            <h2>Model</h2>
+            <p>Model name or provider endpoint ID.</p>
+          </div>
           <input id="model" placeholder="gpt-4.1-mini">
-        </label>
-        <label>
-          Target Language Name
-          <input id="targetLanguage" placeholder="Simplified Chinese">
-        </label>
-        <label>
-          Target Language Code
-          <input id="targetLanguageCode" placeholder="zh-CN">
-        </label>
-        <label>
-          Source Language Code
-          <input id="sourceLanguageCode" placeholder="auto">
-        </label>
-        <label>
-          Batch Size
+        </div>
+
+        <div class="setting-row">
+          <div>
+            <h2>Batch Size</h2>
+            <p>How many page blocks to translate in one request.</p>
+          </div>
           <input id="batchSize" type="number" min="1" max="50">
-        </label>
-        <p id="providerNote" class="hint"></p>
-        <div id="deepseekSection">
-          <label>
-            Thinking Mode
+        </div>
+
+        <div id="deepseekSection" class="setting-row double">
+          <div>
+            <h2>DeepSeek Thinking</h2>
+            <p>Controls sent only for deepseek-v4-pro.</p>
+          </div>
+          <div class="inline-grid">
             <select id="thinkingMode">
               <option value="enabled">Enabled</option>
               <option value="disabled">Disabled</option>
             </select>
-          </label>
-          <label>
-            Reasoning Effort
             <select id="reasoningEffort">
               <option value="high">High</option>
               <option value="max">Max</option>
             </select>
-          </label>
+          </div>
+        </div>
+
+        <div id="templateSection" class="setting-block">
+          <h2>Custom Request Template</h2>
+          <textarea id="requestTemplate" spellcheck="false"></textarea>
+        </div>
+
+        <div class="setting-block">
+          <h2>&#x59cb;&#x7ec8;&#x7ffb;&#x8bd1;&#x4ee5;&#x4e0b;&#x7f51;&#x7ad9;</h2>
+          <p>&#x4ee5;&#x4e0b;&#x7f51;&#x7ad9;&#x5c06;&#x59cb;&#x7ec8;&#x88ab;&#x7ffb;&#x8bd1;</p>
+          <textarea id="autoTranslateDomains" spellcheck="false" placeholder="www.reddit.com"></textarea>
+        </div>
+
+        <div class="setting-block">
+          <h2>&#x6c38;&#x4e0d;&#x7ffb;&#x8bd1;&#x4ee5;&#x4e0b;&#x7f51;&#x7ad9;</h2>
+          <p>&#x4ee5;&#x4e0b;&#x7f51;&#x7ad9;&#x5c06;&#x6c38;&#x8fdc;&#x4e0d;&#x4f1a;&#x88ab;&#x7ffb;&#x8bd1;</p>
+          <textarea id="neverTranslateDomains" spellcheck="false" placeholder="example.com"></textarea>
+        </div>
+
+        <div class="setting-block">
+          <h2>Keyboard Shortcut</h2>
+          <p>Default shortcut: Alt+D. Chrome may reserve this shortcut; confirm it on the shortcuts page.</p>
+          <button id="shortcuts" type="button" class="primary">&#x6253;&#x5f00;&#x5feb;&#x6377;&#x952e;&#x8bbe;&#x7f6e;</button>
         </div>
       </section>
 
-      <section id="templateSection">
-        <h2>Custom Request Template</h2>
-        <textarea id="requestTemplate" spellcheck="false"></textarea>
+      <section id="selection" class="panel">
+        <div class="hero">
+          <h2>&#x5212;&#x8bcd;&#x7ffb;&#x8bd1;</h2>
+          <p>&#x5728;&#x7f51;&#x9875;&#x4e2d;&#x9009;&#x62e9;&#x6587;&#x5b57;&#x540e;&#x663e;&#x793a;&#x7ffb;&#x8bd1;&#x6309;&#x94ae;&#xff0c;&#x70b9;&#x51fb;&#x5373;&#x53ef;&#x7ffb;&#x8bd1;&#x9009;&#x4e2d;&#x7684;&#x5185;&#x5bb9;&#x3002;</p>
+        </div>
+        <div class="setting-row">
+          <div>
+            <h2>&#x542f;&#x7528;&#x5212;&#x8bcd;&#x7ffb;&#x8bd1;</h2>
+            <p>&#x542f;&#x7528;&#x540e;&#xff0c;&#x5728;&#x9875;&#x9762;&#x4e2d;&#x5212;&#x9009;&#x6587;&#x5b57;&#x65f6;&#x4f1a;&#x663e;&#x793a;&#x7ffb;&#x8bd1;&#x6309;&#x94ae;&#x3002;</p>
+          </div>
+          <label class="switch"><input id="selectionTranslateEnabled" type="checkbox"><span></span></label>
+        </div>
       </section>
 
-      <section>
-        <h2>Auto-translate Sites</h2>
-        <p class="hint">One domain per line, such as docs.example.com or example.com.</p>
-        <textarea id="autoTranslateDomains" spellcheck="false"></textarea>
-      </section>
-
-      <section>
-        <h2>Keyboard Shortcut</h2>
-        <p class="hint">Default shortcut: Alt+D. Chrome may reserve Alt+D for the address bar, so confirm or change it on Chrome's shortcuts page.</p>
-        <button id="shortcuts" type="button" class="secondary">Open Keyboard Shortcuts</button>
+      <section id="hover" class="panel">
+        <div class="hero">
+          <h2>&#x5f53;&#x524d;&#x6bb5;&#x843d;&#x7684;&#x9f20;&#x6807;&#x60ac;&#x505c;&#x7ffb;&#x8bd1;</h2>
+          <p>&#x53ea;&#x9700;&#x5c06;&#x9f20;&#x6807;&#x60ac;&#x505c;&#x5728;&#x6bb5;&#x843d;&#x4e0a;&#x5e76;&#x6309;&#x4e0b;&#x8bbe;&#x5b9a;&#x7684;&#x5feb;&#x6377;&#x952e;&#xff0c;&#x5373;&#x53ef;&#x81ea;&#x52a8;&#x7ffb;&#x8bd1;&#x3002;</p>
+        </div>
+        <div class="setting-row">
+          <div>
+            <h2>&#x542f;&#x7528;&#x9f20;&#x6807;&#x60ac;&#x505c;&#x7ffb;&#x8bd1;</h2>
+            <p>&#x542f;&#x7528;&#x540e;&#xff0c;&#x53ea;&#x9700;&#x60ac;&#x505c;&#x5728;&#x76ee;&#x6807;&#x6bb5;&#x843d;&#x4e0a;&#x6309;&#x4e0b;&#x7ed1;&#x5b9a;&#x6309;&#x952e;&#x3002;</p>
+          </div>
+          <label class="switch"><input id="hoverTranslateEnabled" type="checkbox"><span></span></label>
+        </div>
+        <div class="setting-row">
+          <div>
+            <h2>&#x9f20;&#x6807;&#x60ac;&#x505c;&#x7ffb;&#x8bd1;&#x89e6;&#x53d1;&#x952e;</h2>
+            <p>&#x5f53;&#x9f20;&#x6807;&#x60ac;&#x505c;&#x5728;&#x6bb5;&#x843d;&#x4e0a;&#x65f6;&#xff0c;&#x6309;&#x53f3;&#x4fa7;&#x5feb;&#x6377;&#x952e;&#x5373;&#x53ef;&#x7ffb;&#x8bd1;&#x3002;</p>
+          </div>
+          <select id="hoverTriggerKey">
+            <option value="ctrl">+ Ctrl</option>
+            <option value="alt">+ Alt</option>
+            <option value="shift">+ Shift</option>
+            <option value="none">No key</option>
+          </select>
+        </div>
       </section>
 
       <footer>
-        <button id="save">Save Settings</button>
+        <button id="save" class="primary" type="button">&#x4fdd;&#x5b58;&#x8bbe;&#x7f6e;</button>
         <span id="status" role="status"></span>
       </footer>
     </main>

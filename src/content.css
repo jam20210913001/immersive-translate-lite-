@@ -23,3 +23,37 @@
   outline: 1px dashed rgba(20, 184, 166, 0.35);
   outline-offset: 2px;
 }
+
+.itl-selection-button {
+  position: absolute;
+  z-index: 2147483647;
+  border: 0;
+  border-radius: 999px;
+  padding: 7px 13px;
+  color: #fff;
+  background: #08aeb8;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.2);
+  font: 700 13px/1.2 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  cursor: pointer;
+}
+
+.itl-floating-panel {
+  position: absolute;
+  z-index: 2147483647;
+  width: min(320px, calc(100vw - 24px));
+  max-height: 240px;
+  overflow: auto;
+  box-sizing: border-box;
+  border: 1px solid rgba(8, 174, 184, 0.4);
+  border-radius: 8px;
+  padding: 12px 14px;
+  color: #0f172a;
+  background: #fff;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.18);
+  font: 14px/1.6 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  overflow-wrap: anywhere;
+}
+
+.itl-floating-loading {
+  color: #64748b;
+}

@@ -11,7 +11,12 @@ It keeps the original page text and inserts translated text below each paragraph
 - Free translation service presets for Google Translate, Microsoft Translator, MyMemory, and LibreTranslate-compatible endpoints
 - Custom request template mode for your own model gateway
 - Per-site auto-translate domain list
+- Never-translate domain list
 - Keyboard shortcut toggle, default `Alt+D`
+- Popup control panel inspired by immersive translation tools
+- Text translation in the popup
+- Selection translation button
+- Paragraph hover translation with a configurable trigger key
 - Popup and context menu toggle
 
 ## Install Locally
@@ -31,6 +36,24 @@ The default command is `Alt+D`. Chrome commonly uses `Alt+D` for focusing the ad
 3. Change `Toggle bilingual translation on the current page`.
 
 The popup and options page both include a Keyboard Shortcuts button that opens Chrome's shortcuts page.
+
+## Interaction Modes
+
+### Webpage Translation
+
+Open the popup and click Translate to insert bilingual translations below readable page blocks.
+
+### Text Translation
+
+Paste text into the popup text box. The translated result appears in the result panel below it.
+
+### Selection Translation
+
+Enable selection translation in Options > Selection Translation. After selecting text on a page, a small Translate button appears near the selection.
+
+### Hover Translation
+
+Enable hover translation in Options > Mouse Hover. By default, hold Ctrl while hovering over a paragraph to translate it in a floating panel. You can change the trigger key to Ctrl, Alt, Shift, or no key.
 
 ## Provider Presets
 

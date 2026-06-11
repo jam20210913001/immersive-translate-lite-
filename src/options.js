@@ -16,41 +16,51 @@ const fields = [
   "batchSize",
   "thinkingMode",
   "reasoningEffort",
-  "requestTemplate"
+  "requestTemplate",
+  "hoverTriggerKey"
+];
+
+const checkboxes = [
+  "selectionTranslateEnabled",
+  "hoverTranslateEnabled"
 ];
 
 const elements = Object.fromEntries(
   [
     "autoTranslateDomains",
+    "neverTranslateDomains",
     "save",
     "shortcuts",
     "status",
     "templateSection",
     "deepseekSection",
-    "apiKeyLabel",
-    "modelLabel",
-    "providerNote",
-    ...fields
+    "apiKeyRow",
+    "modelRow",
+    "pageTitle",
+    "clearCache",
+    "resetSettings",
+    "uiLanguage",
+    ...fields,
+    ...checkboxes
   ].map((id) => [id, document.getElementById(id)])
 );
 
-const providerNotes = {
-  openai: "Use any OpenAI-compatible chat completions endpoint.",
-  deepseek: "Uses DeepSeek chat completions with optional thinking controls.",
-  doubao: "Uses Volcano Ark's OpenAI-compatible chat completions endpoint. Replace the model if your Ark account uses endpoint IDs.",
-  kimi: "Uses Moonshot/Kimi's OpenAI-compatible endpoint.",
-  qwen: "Uses Alibaba DashScope compatible-mode endpoint.",
-  gemini: "Uses Gemini's OpenAI-compatible endpoint. API key is required.",
-  google_free: "No API key. Uses an unofficial public Google Translate endpoint and may be rate-limited or changed.",
-  microsoft_free: "No API key. Uses Bing Translator's web token flow and may be rate-limited or changed.",
-  mymemory_free: "No API key. MyMemory may require a concrete source language; auto falls back to en.",
-  libretranslate_free: "No API key by default, but many LibreTranslate instances require one. You can replace the endpoint.",
-  custom: "Use a JSON request template with {{model}}, {{targetLanguage}}, {{textsJson}}, and {{prompt}}."
+const titles = {
+  basic: "\u57fa\u672c\u8bbe\u7f6e",
+  selection: "\u5212\u8bcd\u7ffb\u8bd1",
+  hover: "\u9f20\u6807\u60ac\u505c"
 };
 
 loadSettings();
+
+document.querySelectorAll(".tab").forEach((tab) => {
+  tab.addEventListener("click", () => switchPanel(tab.dataset.panel));
+});
+
 elements.provider.addEventListener("change", applyProviderPreset);
 elements.save.addEventListener("click", saveSettings);
+elements.clearCache.addEventListener("click", () => setStatus("\u7f13\u5b58\u5df2\u6e05\u9664"));
+elements.resetSettings.addEventListener("click", resetSettings);
 elements.shortcuts.addEventListener("click", async () => {
   await chrome.tabs.create({ url: "chrome://extensions/shortcuts" });
 });
@@ -60,16 +70,16 @@ async function loadSettings() {
   fields.forEach((field) => {
     elements[field].value = settings[field] ?? DEFAULT_SETTINGS[field] ?? "";
   });
+  checkboxes.forEach((field) => {
+    elements[field].checked = Boolean(settings[field]);
+  });
   elements.autoTranslateDomains.value = (settings.autoTranslateDomains || []).join("\n");
+  elements.neverTranslateDomains.value = (settings.neverTranslateDomains || []).join("\n");
+  elements.uiLanguage.value = settings.uiLanguage || "zh-CN";
   syncProviderUi();
 }
 
 async function saveSettings() {
-  const autoTranslateDomains = elements.autoTranslateDomains.value
-    .split(/\r?\n/)
-    .map(normalizeDomain)
-    .filter(Boolean);
-
   const settings = {
     provider: elements.provider.value,
     endpoint: elements.endpoint.value.trim(),
@@ -82,14 +92,22 @@ async function saveSettings() {
     thinkingMode: elements.thinkingMode.value,
     reasoningEffort: elements.reasoningEffort.value,
     requestTemplate: elements.requestTemplate.value,
-    autoTranslateDomains: Array.from(new Set(autoTranslateDomains))
+    hoverTriggerKey: elements.hoverTriggerKey.value,
+    selectionTranslateEnabled: elements.selectionTranslateEnabled.checked,
+    hoverTranslateEnabled: elements.hoverTranslateEnabled.checked,
+    uiLanguage: elements.uiLanguage.value,
+    autoTranslateDomains: uniqueDomains(elements.autoTranslateDomains.value),
+    neverTranslateDomains: uniqueDomains(elements.neverTranslateDomains.value)
   };
 
   await chrome.storage.sync.set(settings);
-  elements.status.textContent = "Saved";
-  setTimeout(() => {
-    elements.status.textContent = "";
-  }, 1800);
+  setStatus("\u5df2\u4fdd\u5b58");
+}
+
+async function resetSettings() {
+  await chrome.storage.sync.set(DEFAULT_SETTINGS);
+  await loadSettings();
+  setStatus("\u5df2\u91cd\u7f6e");
 }
 
 function applyProviderPreset() {
@@ -106,7 +124,32 @@ function syncProviderUi() {
   const isFree = FREE_TRANSLATION_PROVIDERS.has(provider);
   elements.templateSection.hidden = provider !== "custom";
   elements.deepseekSection.hidden = provider !== "deepseek";
-  elements.apiKeyLabel.hidden = isFree;
-  elements.modelLabel.hidden = isFree;
-  elements.providerNote.textContent = providerNotes[provider] || "";
+  elements.apiKeyRow.hidden = isFree;
+  elements.modelRow.hidden = isFree;
+}
+
+function switchPanel(panelId) {
+  document.querySelectorAll(".tab").forEach((tab) => {
+    tab.classList.toggle("active", tab.dataset.panel === panelId);
+  });
+  document.querySelectorAll(".panel").forEach((panel) => {
+    panel.classList.toggle("active", panel.id === panelId);
+  });
+  elements.pageTitle.textContent = titles[panelId] || titles.basic;
+}
+
+function uniqueDomains(value) {
+  return Array.from(new Set(
+    String(value || "")
+      .split(/\r?\n/)
+      .map(normalizeDomain)
+      .filter(Boolean)
+  ));
+}
+
+function setStatus(message) {
+  elements.status.textContent = message;
+  setTimeout(() => {
+    if (elements.status.textContent === message) elements.status.textContent = "";
+  }, 1800);
 }

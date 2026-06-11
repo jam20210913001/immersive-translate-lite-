@@ -9,6 +9,11 @@ export const DEFAULT_SETTINGS = {
   targetLanguage: "\u7b80\u4f53\u4e2d\u6587",
   targetLanguageCode: "zh-CN",
   autoTranslateDomains: [],
+  neverTranslateDomains: [],
+  neverTranslateLanguageCodes: [],
+  selectionTranslateEnabled: true,
+  hoverTranslateEnabled: false,
+  hoverTriggerKey: "ctrl",
   batchSize: 18,
   requestTemplate: "{\n  \"model\": \"{{model}}\",\n  \"input\": \"{{prompt}}\"\n}"
 };

@@ -22,6 +22,11 @@
   ].join(",");
 
   let translating = false;
+  let settingsCache = null;
+  let selectionButton = null;
+  let floatingPanel = null;
+  let hoverTimer = null;
+  const pressedKeys = new Set();
 
   chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     if (message?.type === "TOGGLE_TRANSLATION") {
@@ -34,7 +39,23 @@
     return false;
   });
 
+  document.addEventListener("mouseup", handleSelectionMouseup, true);
+  document.addEventListener("mousedown", handleDocumentMousedown, true);
+  document.addEventListener("mouseover", handleHover, true);
+  document.addEventListener("keydown", (event) => pressedKeys.add(event.key.toLowerCase()), true);
+  document.addEventListener("keyup", (event) => pressedKeys.delete(event.key.toLowerCase()), true);
+
   maybeAutoTranslate();
+
+  async function getSettings() {
+    if (!settingsCache) {
+      settingsCache = await chrome.runtime.sendMessage({ type: "GET_SETTINGS" }).catch(() => ({}));
+      setTimeout(() => {
+        settingsCache = null;
+      }, 3000);
+    }
+    return settingsCache || {};
+  }
 
   async function maybeAutoTranslate() {
     const response = await chrome.runtime.sendMessage({
@@ -60,7 +81,7 @@
     translating = true;
 
     try {
-      const settings = await chrome.runtime.sendMessage({ type: "GET_SETTINGS" });
+      const settings = await getSettings();
       const batchSize = Math.max(1, Number(settings?.batchSize || 18));
       const targets = collectTargets();
 
@@ -117,12 +138,109 @@
     element.classList.remove("itl-translating");
   }
 
+  async function handleSelectionMouseup() {
+    const settings = await getSettings();
+    if (!settings.selectionTranslateEnabled) return;
+
+    const selection = window.getSelection();
+    const text = normalizeText(selection?.toString() || "");
+    if (text.length < 2 || text.length > 1200) {
+      hideSelectionButton();
+      return;
+    }
+
+    const range = selection.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+    showSelectionButton(text, rect);
+  }
+
+  function showSelectionButton(text, rect) {
+    hideSelectionButton();
+    selectionButton = document.createElement("button");
+    selectionButton.className = "itl-selection-button";
+    selectionButton.type = "button";
+    selectionButton.textContent = "\u7ffb\u8bd1";
+    selectionButton.style.left = `${Math.max(8, rect.left + window.scrollX)}px`;
+    selectionButton.style.top = `${Math.max(8, rect.bottom + window.scrollY + 8)}px`;
+    selectionButton.addEventListener("mousedown", (event) => event.preventDefault());
+    selectionButton.addEventListener("click", async () => {
+      showFloatingPanel("Translating...", rect, "loading");
+      const translated = await translateOne(text);
+      showFloatingPanel(translated, rect);
+      hideSelectionButton();
+    });
+    document.documentElement.appendChild(selectionButton);
+  }
+
+  async function handleHover(event) {
+    const settings = await getSettings();
+    if (!settings.hoverTranslateEnabled || !hoverKeyMatches(settings.hoverTriggerKey)) return;
+
+    const target = event.target?.closest?.(BLOCK_SELECTOR);
+    if (!target || !isVisible(target) || target.hasAttribute(DONE_ATTR)) return;
+
+    const text = normalizeText(target.innerText);
+    if (text.length < MIN_TEXT_LENGTH || text.length > 1200 || looksLikeCode(text)) return;
+
+    clearTimeout(hoverTimer);
+    hoverTimer = setTimeout(async () => {
+      const rect = target.getBoundingClientRect();
+      showFloatingPanel("Translating...", rect, "loading");
+      const translated = await translateOne(text);
+      showFloatingPanel(translated, rect);
+    }, 280);
+  }
+
+  function hoverKeyMatches(key) {
+    const normalized = String(key || "ctrl").toLowerCase();
+    if (normalized === "none") return true;
+    if (normalized === "ctrl") return pressedKeys.has("control");
+    if (normalized === "alt") return pressedKeys.has("alt");
+    if (normalized === "shift") return pressedKeys.has("shift");
+    return true;
+  }
+
+  async function translateOne(text) {
+    const response = await chrome.runtime.sendMessage({
+      type: "TRANSLATE_BATCH",
+      texts: [text]
+    }).catch((error) => ({ ok: false, error: error.message }));
+    if (!response?.ok) return response?.error || "Translation failed.";
+    return response.translations?.[0] || "";
+  }
+
+  function showFloatingPanel(text, rect, state = "") {
+    hideFloatingPanel();
+    floatingPanel = document.createElement("div");
+    floatingPanel.className = `itl-floating-panel ${state ? `itl-floating-${state}` : ""}`;
+    floatingPanel.textContent = text;
+    floatingPanel.style.left = `${Math.min(window.scrollX + rect.left, window.scrollX + window.innerWidth - 340)}px`;
+    floatingPanel.style.top = `${window.scrollY + rect.bottom + 10}px`;
+    document.documentElement.appendChild(floatingPanel);
+  }
+
+  function handleDocumentMousedown(event) {
+    if (event.target?.closest?.(".itl-selection-button, .itl-floating-panel")) return;
+    hideSelectionButton();
+    hideFloatingPanel();
+  }
+
   function clearTranslations() {
     document.querySelectorAll(`.${TRANSLATION_CLASS}`).forEach((element) => element.remove());
     document.querySelectorAll(`[${DONE_ATTR}]`).forEach((element) => {
       element.removeAttribute(DONE_ATTR);
       element.classList.remove("itl-translating");
     });
+  }
+
+  function hideSelectionButton() {
+    selectionButton?.remove();
+    selectionButton = null;
+  }
+
+  function hideFloatingPanel() {
+    floatingPanel?.remove();
+    floatingPanel = null;
   }
 
   function removeNextTranslation(element) {
